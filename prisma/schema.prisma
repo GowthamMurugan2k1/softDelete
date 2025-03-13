@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Video {
+  id             String          @unique @default(uuid())
+  title          String
+  status         Status          @default(ACTIVE)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  deletedAt      DateTime?
+  categoryVideos CategoryVideo[]
+}
+
+model Playlist {
+  id             String          @unique @default(uuid())
+  name           String
+  status         Status          @default(ACTIVE)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  deletedAt      DateTime?
+  categories     Category[]
+  categoryVideos CategoryVideo[]
+}
+
+model CategoryVideo {
+  id         String    @unique @default(uuid())
+  playlistId String
+  videoId    String
+  categoryId String
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  deletedAt  DateTime?
+  status     Status    @default(ACTIVE)
+  video      Video     @relation(fields: [videoId], references: [id])
+  category   Category  @relation(fields: [categoryId], references: [id])
+  playlist   Playlist  @relation(fields: [playlistId], references: [id])
+}
+
+model Category {
+  id         String    @unique @default(uuid())
+  playlistId String
+  name       String
+  status     Status    @default(ACTIVE)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  deletedAt  DateTime?
+
+  playlist       Playlist        @relation(fields: [playlistId], references: [id])
+  categoryVideos CategoryVideo[]
+}
+
+enum Status {
+  ACTIVE
+  INACTIVE
+  DELETED
+}
